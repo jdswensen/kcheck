@@ -21,12 +21,12 @@
 //! todo: derive readme from doc comments
 
 use flate2::read::GzDecoder;
-use std::path::Path;
 use std::io::Read;
+use std::path::Path;
 
 pub mod config;
 pub mod error;
-use error::{KcheckResult, KcheckError};
+use error::{KcheckError, KcheckResult};
 
 pub mod kconfig;
 pub mod kernel;
@@ -46,7 +46,7 @@ fn deflate_gzip_file<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
 fn open_file<P: AsRef<Path>>(path: P) -> KcheckResult<std::fs::File> {
     if !path.as_ref().exists() {
         let path_string: String = path.as_ref().to_string_lossy().to_string();
-        return Err(KcheckError::FileDoesNotExist(path_string))
+        return Err(KcheckError::FileDoesNotExist(path_string));
     }
 
     let file = std::fs::File::open(path)?;

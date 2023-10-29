@@ -26,7 +26,7 @@ fn main() {
 
     let files = vec![
         kcheck_serial.to_string_lossy().to_string(),
-        kcheck_random.to_string_lossy().to_string()
+        kcheck_random.to_string_lossy().to_string(),
     ];
 
     let cfg = KcheckConfig::generate(files);

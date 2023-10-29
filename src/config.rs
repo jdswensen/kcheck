@@ -32,15 +32,13 @@ impl KcheckConfigFragment {
         KcheckConfigFragment {
             name,
             reason,
-            kernel
+            kernel,
         }
     }
 
     /// Check if the fragment is empty.
     pub fn is_empty(&self) -> bool {
-        self.name.is_none()
-        && self.reason.is_none()
-        && self.kernel.is_empty()
+        self.name.is_none() && self.reason.is_none() && self.kernel.is_empty()
     }
 }
 
@@ -142,9 +140,7 @@ impl KcheckConfig {
             None => true,
         };
 
-        self.name.is_none()
-        && kernel_is_empty
-        && fragment_is_empty
+        self.name.is_none() && kernel_is_empty && fragment_is_empty
     }
 }
 
