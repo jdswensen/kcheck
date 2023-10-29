@@ -1,0 +1,11 @@
+[[fragment]]
+name = "random"
+reason = "Random test data"
+
+[[fragment.kernel]]
+name = "CONFIG_RANDOM"
+state = "On"
+
+[[fragment.kernel]]
+name = "CONFIG_NEW_THING"
+state = "Enabled"

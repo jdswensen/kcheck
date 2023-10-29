@@ -1,0 +1,11 @@
+[[fragment]]
+name = "usb-serial"
+reason = "Serial USB support"
+
+[[fragment.kernel]]
+name = "CONFIG_USB_ACM"
+state = "On"
+
+[[fragment.kernel]]
+name = "CONFIG_USB_SERIAL"
+state = "On"
