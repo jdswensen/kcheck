@@ -1,5 +1,10 @@
-[package]
-name = "kcheck"
+[workspace]
+resolver = "2"
+members = [
+    "kcheck",
+]
+
+[workspace.package]
 version = "0.1.0"
 license = "MPL-2.0"
 authors = ["Jake Swensen <jake@swensen.io>"]
@@ -8,7 +13,7 @@ description = "Kernel configuration checking utility"
 repository = "https://github.com/jdswensen/kcheck"
 edition = "2021"
 
-[dependencies]
+[workspace.dependencies]
 flate2 = "1.0.28"
 nix = { version = "0.27.1", features = ["feature"] }
 serde = { version = "1.0.190", features = ["derive"] }
