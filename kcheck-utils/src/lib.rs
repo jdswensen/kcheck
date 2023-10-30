@@ -9,8 +9,8 @@ use flate2::read::GzDecoder;
 use std::io::{Read, Result};
 use std::path::Path;
 
-/// Deflate a gzip'd file into a string.
-pub fn deflate_gzip_file<P: AsRef<Path>>(path: P) -> Result<String> {
+/// Inflate a gzip'd file into a string.
+pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> Result<String> {
     let contents = file_contents_as_bytes(path)?;
     let mut gz = GzDecoder::new(&contents[..]);
     let mut s = String::new();

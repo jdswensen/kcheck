@@ -39,7 +39,7 @@ impl KernelConfig {
         );
 
         if proc_config_gz.exists() {
-            kcheck_utils::deflate_gzip_file(proc_config_gz)
+            kcheck_utils::inflate_gzip_file(proc_config_gz)
                 .map(|contents| KernelConfig(contents))
                 .map_err(|e| e.into())
         } else if boot_config.exists() {
