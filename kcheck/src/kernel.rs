@@ -20,7 +20,7 @@ impl KernelConfig {
     /// This is useful for checking kernel configs that are not a part of the
     /// running system, not the default kernel, or are in non-standard locations.
     fn try_from_file<P: AsRef<Path>>(path: P) -> KcheckResult<Self> {
-        let contents = util::file_contents_as_string(path)?;
+        let contents = kcheck_utils::file_contents_as_string(path)?;
         Ok(KernelConfig(contents))
     }
 
@@ -39,7 +39,7 @@ impl KernelConfig {
         );
 
         if proc_config_gz.exists() {
-            util::deflate_gzip_file(proc_config_gz)
+            kcheck_utils::deflate_gzip_file(proc_config_gz)
                 .map(|contents| KernelConfig(contents))
                 .map_err(|e| e.into())
         } else if boot_config.exists() {

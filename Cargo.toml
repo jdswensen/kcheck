@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "kcheck",
-    "util"
+    "kcheck-utils"
 ]
 
 [workspace.package]
@@ -21,3 +21,4 @@ serde = { version = "1.0.190", features = ["derive"] }
 serde_json = "1.0.107"
 thiserror = "1.0.50"
 toml = "0.8.6"
+kcheck-utils = { path = "kcheck-utils" }
