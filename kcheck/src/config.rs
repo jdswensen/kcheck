@@ -95,7 +95,7 @@ impl KcheckConfig {
     }
 
     pub fn try_from_file<P: AsRef<Path>>(path: P) -> KcheckResult<Self> {
-        let contents = crate::file_contents_as_string(path.as_ref())?;
+        let contents = util::file_contents_as_string(path.as_ref())?;
 
         let cfg: KcheckConfig = match path.as_ref().extension().and_then(OsStr::to_str) {
             Some("toml") => toml::from_str(&contents)?,
@@ -113,10 +113,10 @@ impl KcheckConfig {
     /// The resulting `KcheckConfig` object will have the global name from
     /// `self`.
     pub fn append(&mut self, other: &mut Self) {
-        let new_kernel = crate::option_vector_append(self.kernel.take(), other.kernel.take());
+        let new_kernel = util::option_vector_append(self.kernel.take(), other.kernel.take());
         self.kernel = new_kernel;
 
-        let new_fragment = crate::option_vector_append(self.fragment.take(), other.fragment.take());
+        let new_fragment = util::option_vector_append(self.fragment.take(), other.fragment.take());
         self.fragment = new_fragment;
     }
 
