@@ -54,7 +54,10 @@ pub fn file_contents_as_string<P: AsRef<Path>>(path: P) -> Result<String> {
 ///
 /// Returns the resulting `Option<Vec<T>>`.
 /// todo: this could probably be written in a more ergonomic way
-pub fn option_vector_append<T>(mut orig: Option<Vec<T>>, mut other: Option<Vec<T>>) -> Option<Vec<T>> {
+pub fn option_vector_append<T>(
+    mut orig: Option<Vec<T>>,
+    mut other: Option<Vec<T>>,
+) -> Option<Vec<T>> {
     if other.is_some() {
         if orig.is_none() {
             // The orginal vector is empty, so just take the other vector

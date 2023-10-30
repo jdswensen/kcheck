@@ -113,10 +113,12 @@ impl KcheckConfig {
     /// The resulting `KcheckConfig` object will have the global name from
     /// `self`.
     pub fn append(&mut self, other: &mut Self) {
-        let new_kernel = kcheck_utils::option_vector_append(self.kernel.take(), other.kernel.take());
+        let new_kernel =
+            kcheck_utils::option_vector_append(self.kernel.take(), other.kernel.take());
         self.kernel = new_kernel;
 
-        let new_fragment = kcheck_utils::option_vector_append(self.fragment.take(), other.fragment.take());
+        let new_fragment =
+            kcheck_utils::option_vector_append(self.fragment.take(), other.fragment.take());
         self.fragment = new_fragment;
     }
 
