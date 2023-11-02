@@ -6,11 +6,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use flate2::read::GzDecoder;
-use std::io::{Read, Result};
+use std::io::Read;
 use std::path::Path;
 
+mod error;
+pub use error::{KcheckError, KcheckResult};
+
 /// Inflate a gzip'd file into a string.
-pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> Result<String> {
+pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
     let contents = file_contents_as_bytes(path)?;
     let mut gz = GzDecoder::new(&contents[..]);
     let mut s = String::new();
@@ -21,13 +24,10 @@ pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> Result<String> {
 /// Open a file.
 ///
 /// Function that provides basic file opening and error handling.
-pub fn open_file<P: AsRef<Path>>(path: P) -> Result<std::fs::File> {
+pub fn open_file<P: AsRef<Path>>(path: P) -> KcheckResult<std::fs::File> {
     if !path.as_ref().exists() {
         let path_string: String = path.as_ref().to_string_lossy().to_string();
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::NotFound,
-            format!("File does not exist: {}", path_string),
-        ));
+        return Err(KcheckError::FileDoesNotExist(path_string));
     }
 
     let file = std::fs::File::open(path)?;
@@ -35,7 +35,7 @@ pub fn open_file<P: AsRef<Path>>(path: P) -> Result<std::fs::File> {
 }
 
 /// Parse file contents into a vector of bytes.
-pub fn file_contents_as_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>> {
+pub fn file_contents_as_bytes<P: AsRef<Path>>(path: P) -> KcheckResult<Vec<u8>> {
     let mut file = open_file(path)?;
     let mut contents = Vec::<u8>::new();
     file.read_to_end(&mut contents)?;
@@ -43,7 +43,7 @@ pub fn file_contents_as_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>> {
 }
 
 /// Parse file contents into a string.
-pub fn file_contents_as_string<P: AsRef<Path>>(path: P) -> Result<String> {
+pub fn file_contents_as_string<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
     let mut file = open_file(path)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;

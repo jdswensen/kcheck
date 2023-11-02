@@ -21,6 +21,7 @@
 //! todo: derive readme from doc comments
 
 pub mod config;
-pub mod error;
 pub mod kconfig;
 pub mod kernel;
+
+pub use kcheck_utils as error;
