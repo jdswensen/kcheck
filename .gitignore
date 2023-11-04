@@ -4,3 +4,5 @@
 *.profraw
 *.profdata
 **coverage/*
+
+/.vscode
