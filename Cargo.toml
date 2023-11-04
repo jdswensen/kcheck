@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
     "kcheck",
-    "kcheck-utils"
+    "kcheck-utils",
+    "xtask"
 ]
 
 [workspace.package]
