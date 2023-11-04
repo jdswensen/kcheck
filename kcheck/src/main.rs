@@ -24,10 +24,7 @@ fn main() {
         .join("kcheck-random.toml");
     println!("{kcheck_random:?}");
 
-    let files = vec![
-        kcheck_serial.to_string_lossy().to_string(),
-        kcheck_random.to_string_lossy().to_string(),
-    ];
+    let files = vec![kcheck_serial, kcheck_random];
 
     let cfg = KcheckConfig::generate(files);
     println!("{cfg:#?}");

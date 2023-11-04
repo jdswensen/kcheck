@@ -55,7 +55,7 @@ pub struct KcheckConfig {
 
 impl KcheckConfig {
     /// Generate a single `KcheckConfig` object from a collection of config files.
-    pub fn generate(files: Vec<String>) -> KcheckResult<Self> {
+    pub fn generate<P: AsRef<Path>>(files: Vec<P>) -> KcheckResult<Self> {
         // collection of config files and fragments
         let mut collection: Vec<Self> = Vec::new();
 
@@ -67,7 +67,7 @@ impl KcheckConfig {
 
         // Collect all fragments into a single vector
         for item in files {
-            fragments.push(item);
+            fragments.push(item.as_ref().to_string_lossy().to_string());
         }
 
         for fragment in fragments {
