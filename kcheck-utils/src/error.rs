@@ -11,6 +11,8 @@ pub type KcheckResult<T> = Result<T, KcheckError>;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum KcheckError {
+    #[error("Duplicate config found: {0}")]
+    DuplicateConfig(String),
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
     #[error("File is not a valid: {0}")]
@@ -29,6 +31,8 @@ pub enum KcheckError {
     TomlParseError(#[from] toml::de::Error),
     #[error("Unknown file type: {0}")]
     UnknownFileType(String),
+    #[error("Unknown kernel config option: {0}")]
+    UnknownKernelConfigOption(String),
 }
 
 impl From<std::io::Error> for KcheckError {
