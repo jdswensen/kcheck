@@ -5,7 +5,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::error::KcheckResult;
+use crate::error::{KcheckError, KcheckResult};
 use crate::kconfig::KconfigState;
 use nix::sys::utsname::uname;
 use std::path::{Path, PathBuf};
@@ -91,8 +91,55 @@ impl KernelConfig {
     }
 
     /// Get the state of a kernel config option.
-    fn get_option(&self, option: String) -> KconfigState {
-        todo!()
+    pub fn get_option(&self, option: &str) -> KcheckResult<KconfigState> {
+        println!("option: {option:?}");
+
+        // Superset of the option string
+        // Used to rule out false positives
+        let super_string = format!("{option}_");
+
+        // Seach the config for the desired option and store the result
+        let mut found_state: Vec<KcheckResult<KconfigState>> = self.lines.iter().fold(
+            Vec::<KcheckResult<KconfigState>>::new(),
+            |mut result, line| {
+                if line.contains(option) && !line.contains(&super_string) {
+                    // The config option has been found, now split up the line
+                    let line_parts: Vec<&str> = line.split_inclusive(option).collect();
+
+                    if Self::is_comment(line_parts[0]) && Self::contains_is_not_set(line_parts[1]) {
+                        result.push(Ok(KconfigState::NotSet));
+                    } else if !Self::is_comment(line_parts[0]) && line_parts[1].contains('=') {
+                        let value = line_parts[1].split('=').collect::<Vec<&str>>()[1];
+                        match value {
+                            "y" => result.push(Ok(KconfigState::On)),
+                            "m" => result.push(Ok(KconfigState::Module)),
+                            "n" => result.push(Ok(KconfigState::Off)),
+                            v => result
+                                .push(Err(KcheckError::UnknownKernelConfigOption(v.to_string()))),
+                        }
+                    } else {
+                        println!("unexpected config option state");
+                    }
+                }
+
+                result
+            },
+        );
+
+        // Parse results
+        match found_state.len() {
+            0 => Ok(KconfigState::NotFound),
+            1 => found_state.remove(0),
+            _ => Err(KcheckError::DuplicateConfig(option.to_string())),
+        }
+    }
+
+    fn contains_is_not_set(option: &str) -> bool {
+        option.contains("is not set")
+    }
+
+    fn is_comment(line: &str) -> bool {
+        line.starts_with('#')
     }
 
     /// Check the state of a kernel config option.
@@ -100,5 +147,90 @@ impl KernelConfig {
     /// Returns true if the option is in the desired state, false otherwise.
     fn check_option(&self, desired_option: String, desired_state: KconfigState) -> bool {
         todo!()
+    }
+
+    /// Internal function for appending kernel config options to the KernelConfig struct.
+    pub(crate) fn push_option(&mut self, option: &str, state: KconfigState) {
+        let string = match state {
+            KconfigState::NotFound => String::default(),
+            KconfigState::NotSet => format!("# {option} is not set"),
+            KconfigState::Off | KconfigState::Disabled => format!("{option}=n"),
+            KconfigState::On | KconfigState::Enabled => format!("{option}=y"),
+            KconfigState::Module => format!("{option}=m"),
+            KconfigState::Value(v) => todo!(),
+            KconfigState::Text(s) => todo!(),
+        };
+
+        self.lines.push(string);
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn helper_create_kernel_cfg(options: &[(&str, KconfigState)]) -> KernelConfig {
+        let mut kernel_cfg = KernelConfig::default();
+        for (option, state) in options {
+            kernel_cfg.push_option(option, state.clone());
+        }
+
+        kernel_cfg
+    }
+
+    fn helper_assert_option_state_ok(
+        kernel_cfg: &KernelConfig,
+        option: &str,
+        expected: KconfigState,
+    ) {
+        let result = kernel_cfg
+            .get_option(option)
+            .expect("Expected to get an option state");
+        assert_eq!(expected, result);
+    }
+
+    fn helper_assert_option_state_err(
+        kernel_cfg: &KernelConfig,
+        option: &str,
+        expected: KcheckError,
+    ) {
+        let result = kernel_cfg
+            .get_option(option)
+            .expect_err("Expected to get an option state error");
+        assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn success_get_option_on() {
+        let test_option = "CONFIG_TEST";
+        let test_state = KconfigState::On;
+        let test_data = [(test_option, test_state.clone())];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state);
+    }
+
+    #[test]
+    fn success_get_option_not_set() {
+        let test_option = "CONFIG_TEST_NOT_SET";
+        let test_state = KconfigState::NotSet;
+        let test_data = [(test_option, test_state.clone())];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state);
+    }
+
+    #[test]
+    fn fail_duplicate_option() {
+        let test_option = "CONFIG_TEST";
+        let test_state = KconfigState::On;
+        let test_data = [
+            (test_option, test_state.clone()),
+            (test_option, test_state.clone()),
+        ];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        let expected = KcheckError::DuplicateConfig(test_option.to_string());
+        helper_assert_option_state_err(&kernel_cfg, test_option, expected);
     }
 }
