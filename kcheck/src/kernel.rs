@@ -108,7 +108,7 @@ impl KernelConfig {
 
                     if Self::is_comment(line_parts[0]) && Self::contains_is_not_set(line_parts[1]) {
                         result.push(Ok(KconfigState::NotSet));
-                    } else if !Self::is_comment(line_parts[0]) && line_parts[1].contains('=') {
+                    } else if line_parts.len() > 1 && !Self::is_comment(line_parts[0]) && line_parts[1].contains('=') {
                         let value = line_parts[1].split('=').collect::<Vec<&str>>()[1];
                         match value {
                             "y" => result.push(Ok(KconfigState::On)),
@@ -118,7 +118,7 @@ impl KernelConfig {
                                 .push(Err(KcheckError::UnknownKernelConfigOption(v.to_string()))),
                         }
                     } else {
-                        println!("unexpected config option state");
+                        result.push(Err(KcheckError::KernelConfigParseError))
                     }
                 }
 
@@ -318,5 +318,15 @@ mod test {
 
         let expected = KcheckError::DuplicateConfig(test_option.to_string());
         helper_assert_option_state_err(&kernel_cfg, test_option, expected);
+    }
+
+    #[test]
+    fn fail_kernel_config_parse() {
+        let test_option = "CONFIG_TEST";
+        let mut kernel_cfg = KernelConfig::default();
+        kernel_cfg.lines.push(test_option.to_string());
+
+        let expected = KcheckError::KernelConfigParseError;
+        helper_assert_option_state_err(&kernel_cfg, test_option, expected)
     }
 }

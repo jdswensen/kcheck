@@ -23,6 +23,8 @@ pub enum KcheckError {
     JsonParseError(String),
     #[error("Kernel config not found")]
     KernelConfigNotFound,
+    #[error("Kernel config parse error")]
+    KernelConfigParseError,
     #[error("No file extension found")]
     MissingFileExtension,
     #[error("Could not find a config file")]
