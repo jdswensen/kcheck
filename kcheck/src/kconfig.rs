@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// For example, there could be a requirement that a kernel config option be
 /// `Enabled` meaning that is present in the system but there is no desire to
 /// force it to be set to `y` or `m`.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum KconfigState {
     /// Kernel config option is not found
     NotFound,

@@ -9,16 +9,16 @@ use thiserror::Error;
 
 pub type KcheckResult<T> = Result<T, KcheckError>;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum KcheckError {
     #[error("File does not exist: {0}")]
     FileDoesNotExist(String),
     #[error("File is not a valid: {0}")]
     InvalidFile(String),
     #[error("IO Error: {0}")]
-    IoError(#[from] std::io::Error),
+    IoError(String),
     #[error("Error parsing json file: {0}")]
-    JsonParseError(#[from] serde_json::Error),
+    JsonParseError(String),
     #[error("Kernel config not found")]
     KernelConfigNotFound,
     #[error("No file extension found")]
@@ -29,4 +29,16 @@ pub enum KcheckError {
     TomlParseError(#[from] toml::de::Error),
     #[error("Unknown file type: {0}")]
     UnknownFileType(String),
+}
+
+impl From<std::io::Error> for KcheckError {
+    fn from(e: std::io::Error) -> Self {
+        KcheckError::IoError(e.to_string())
+    }
+}
+
+impl From<serde_json::Error> for KcheckError {
+    fn from(e: serde_json::Error) -> Self {
+        KcheckError::JsonParseError(e.to_string())
+    }
 }
