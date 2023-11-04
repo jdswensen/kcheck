@@ -5,12 +5,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+pub mod error;
+
+use error::{KcheckError, KcheckResult};
 use flate2::read::GzDecoder;
 use std::io::Read;
 use std::path::Path;
-
-mod error;
-pub use error::{KcheckError, KcheckResult};
 
 /// Inflate a gzip'd file into a string.
 pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
