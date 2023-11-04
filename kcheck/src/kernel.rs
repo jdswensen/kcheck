@@ -172,6 +172,12 @@ impl KernelConfig {
 mod test {
     use super::*;
 
+    #[derive(Clone, Debug, PartialEq)]
+    enum AssertMatch {
+        True,
+        False,
+    }
+
     fn helper_create_kernel_cfg(options: &[(&str, KconfigState)]) -> KernelConfig {
         let mut kernel_cfg = KernelConfig::default();
         for (option, state) in options {
@@ -185,11 +191,17 @@ mod test {
         kernel_cfg: &KernelConfig,
         option: &str,
         expected: KconfigState,
+        assert_match: AssertMatch,
     ) {
         let result = kernel_cfg
             .get_option(option)
             .expect("Expected to get an option state");
-        assert_eq!(expected, result);
+
+        if assert_match == AssertMatch::True {
+            assert_eq!(expected, result);
+        } else {
+            assert_ne!(expected, result);
+        }
     }
 
     fn helper_assert_option_state_err(
@@ -210,7 +222,12 @@ mod test {
         let test_data = [(test_option, test_state.clone())];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        helper_assert_option_state_ok(
+            &kernel_cfg,
+            test_option,
+            test_state.clone(),
+            AssertMatch::True,
+        );
         assert!(kernel_cfg.check_option(test_option, test_state));
     }
 
@@ -221,7 +238,12 @@ mod test {
         let test_data = [(test_option, test_state.clone())];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        helper_assert_option_state_ok(
+            &kernel_cfg,
+            test_option,
+            test_state.clone(),
+            AssertMatch::True,
+        );
         assert!(kernel_cfg.check_option(test_option, test_state));
     }
 
@@ -232,7 +254,12 @@ mod test {
         let test_data = [(test_option, test_state.clone())];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        helper_assert_option_state_ok(
+            &kernel_cfg,
+            test_option,
+            test_state.clone(),
+            AssertMatch::True,
+        );
         assert!(kernel_cfg.check_option(test_option, test_state));
     }
 
@@ -247,8 +274,24 @@ mod test {
         ];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        helper_assert_option_state_ok(
+            &kernel_cfg,
+            test_option,
+            test_state.clone(),
+            AssertMatch::True,
+        );
         assert!(kernel_cfg.check_option(test_option, test_state));
+    }
+
+    #[test]
+    fn fail_wrong_option_state() {
+        let test_option = "CONFIG_TEST";
+        let test_state = KconfigState::On;
+        let test_data = [(test_option, test_state.clone())];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        let expected = KconfigState::Off;
+        helper_assert_option_state_ok(&kernel_cfg, test_option, expected, AssertMatch::False);
     }
 
     #[test]
