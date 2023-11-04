@@ -52,8 +52,11 @@ pub struct KconfigOption {
 
 impl KconfigOption {
     /// Create a new `KconfigOption`
-    fn new(name: String, state: KconfigState) -> Self {
-        todo!()
+    pub fn new(name: &str, state: KconfigState) -> Self {
+        KconfigOption {
+            name: name.to_string(),
+            state,
+        }
     }
 
     /// Get the name of the kernel config option.
@@ -64,5 +67,20 @@ impl KconfigOption {
     /// Get the state of the kernel config option.
     pub fn state(&self) -> KconfigState {
         self.state.clone()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn success_new() {
+        let test_option = "CONFIG_TEST_OPTION";
+        let test_state = KconfigState::On;
+
+        let option = KconfigOption::new(test_option, test_state.clone());
+        assert_eq!(option.name(), test_option);
+        assert_eq!(option.state(), test_state);
     }
 }
