@@ -158,7 +158,7 @@ impl KernelConfig {
             KconfigState::On | KconfigState::Enabled => format!("{option}=y"),
             KconfigState::Module => format!("{option}=m"),
             KconfigState::Value(v) => todo!(),
-            KconfigState::Text(s) => todo!(),
+            KconfigState::Text(s) => format!("{option}=\"{s}\""),
         };
 
         self.lines.push(string);
