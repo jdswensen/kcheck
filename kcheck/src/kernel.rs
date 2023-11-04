@@ -145,8 +145,11 @@ impl KernelConfig {
     /// Check the state of a kernel config option.
     ///
     /// Returns true if the option is in the desired state, false otherwise.
-    fn check_option(&self, desired_option: String, desired_state: KconfigState) -> bool {
-        todo!()
+    pub fn check_option(&self, desired_option: &str, desired_state: KconfigState) -> bool {
+        match self.get_option(desired_option) {
+            Ok(state) => state == desired_state,
+            Err(_) => false,
+        }
     }
 
     /// Internal function for appending kernel config options to the KernelConfig struct.
@@ -207,7 +210,19 @@ mod test {
         let test_data = [(test_option, test_state.clone())];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state);
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        assert!(kernel_cfg.check_option(test_option, test_state));
+    }
+
+    #[test]
+    fn success_get_option_off() {
+        let test_option = "CONFIG_TEST_OFF";
+        let test_state = KconfigState::Off;
+        let test_data = [(test_option, test_state.clone())];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        assert!(kernel_cfg.check_option(test_option, test_state));
     }
 
     #[test]
@@ -217,7 +232,35 @@ mod test {
         let test_data = [(test_option, test_state.clone())];
         let kernel_cfg = helper_create_kernel_cfg(&test_data);
 
-        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state);
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        assert!(kernel_cfg.check_option(test_option, test_state));
+    }
+
+    #[test]
+    fn success_get_option_not_found() {
+        let test_option = "CONFIG_DOES_NOT_EXIST";
+        let test_state = KconfigState::NotFound;
+        let test_data = [
+            ("CONFIG_TEST_ONE", KconfigState::On),
+            ("CONFIG_TEST_TWO", KconfigState::Off),
+            ("CONFIG_TEST_THREE", KconfigState::Module),
+        ];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        helper_assert_option_state_ok(&kernel_cfg, test_option, test_state.clone());
+        assert!(kernel_cfg.check_option(test_option, test_state));
+    }
+
+    #[test]
+    fn fail_unknown_option() {
+        let test_option = "CONFIG_INCORRECT";
+        let test_state = KconfigState::Text("incorrect".to_string());
+
+        let test_data = [(test_option, test_state.clone())];
+        let kernel_cfg = helper_create_kernel_cfg(&test_data);
+
+        let expected = KcheckError::UnknownKernelConfigOption("\"incorrect\"".to_string());
+        helper_assert_option_state_err(&kernel_cfg, test_option, expected);
     }
 
     #[test]
