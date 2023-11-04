@@ -8,11 +8,47 @@
 use crate::error::KcheckResult;
 use crate::kconfig::KconfigState;
 use nix::sys::utsname::uname;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
+
+impl FromStr for KernelConfig {
+    type Err = KcheckError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let all_lines = s.lines();
+        let mut lines: Vec<String> = Vec::new();
+
+        for line in all_lines {
+            lines.push(line.to_string());
+        }
+
+        Ok(KernelConfig {
+            src: KernelConfigSource::default(),
+            lines,
+        })
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub enum KernelConfigSource {
+    #[default]
+    String,
+    File(PathBuf),
+    Stdin,
+}
 
 /// A representation of a kernel config.
-#[derive(Clone, Debug)]
-pub struct KernelConfig(String);
+#[derive(Clone, Debug, Default)]
+pub struct KernelConfig {
+    src: KernelConfigSource,
+    lines: Vec<String>,
+}
+
+impl From<PathBuf> for KernelConfigSource {
+    fn from(path: PathBuf) -> Self {
+        KernelConfigSource::File(path)
+    }
+}
 
 impl KernelConfig {
     /// Create a new kernel config object from a path to the kernel config file.
@@ -20,8 +56,12 @@ impl KernelConfig {
     /// This is useful for checking kernel configs that are not a part of the
     /// running system, not the default kernel, or are in non-standard locations.
     fn try_from_file<P: AsRef<Path>>(path: P) -> KcheckResult<Self> {
-        let contents = kcheck_utils::file_contents_as_string(path)?;
-        Ok(KernelConfig(contents))
+        let contents = kcheck_utils::file_contents_as_string(path.as_ref())?;
+        let mut config = Self::from_str(contents.as_str())?;
+
+        // Set the source type to a file
+        config.src = path.as_ref().to_path_buf().into();
+        Ok(config)
     }
 
     /// Create a `KernelConfig` object from the system`s kernel config file.
@@ -39,9 +79,8 @@ impl KernelConfig {
         );
 
         if proc_config_gz.exists() {
-            kcheck_utils::inflate_gzip_file(proc_config_gz)
-                .map(|contents| KernelConfig(contents))
-                .map_err(|e| e.into())
+            let contents = kcheck_utils::inflate_gzip_file(proc_config_gz)?;
+            Self::from_str(contents.as_str())
         } else if boot_config.exists() {
             Self::try_from_file(boot_config)
         } else if Path::new(&boot_config_release_string).exists() {
