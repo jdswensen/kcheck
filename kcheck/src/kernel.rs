@@ -11,7 +11,7 @@ use nix::sys::utsname::uname;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub enum KernelConfigSource {
     #[default]
     String,
@@ -328,5 +328,36 @@ mod test {
 
         let expected = KcheckError::KernelConfigParseError;
         helper_assert_option_state_err(&kernel_cfg, test_option, expected)
+    }
+
+    #[test]
+    fn success_kernel_config_from_str() {
+        let raw_one = "CONFIG_TEST_ONE=y";
+        let raw_two = "CONFIG_TEST_TWO=n";
+        let raw_three = "# CONFIG_TEST_THREE is not set";
+        let raw_config = format!("{raw_one}\n{raw_two}\n{raw_three}");
+        let cfg = KernelConfig::from_str(&raw_config)
+            .expect("Expected to create a kernel config from a string");
+
+        helper_assert_option_state_ok(&cfg, "CONFIG_TEST_ONE", KconfigState::On, AssertMatch::True);
+        helper_assert_option_state_ok(
+            &cfg,
+            "CONFIG_TEST_TWO",
+            KconfigState::Off,
+            AssertMatch::True,
+        );
+        helper_assert_option_state_ok(
+            &cfg,
+            "CONFIG_TEST_THREE",
+            KconfigState::NotSet,
+            AssertMatch::True,
+        );
+    }
+
+    #[test]
+    fn success_kernel_config_source_from_pathbuf() {
+        let path = PathBuf::from("/path/to/config");
+        let source = KernelConfigSource::from(path.clone());
+        assert_eq!(source, KernelConfigSource::File(path));
     }
 }
