@@ -108,7 +108,10 @@ impl KernelConfig {
 
                     if Self::is_comment(line_parts[0]) && Self::contains_is_not_set(line_parts[1]) {
                         result.push(Ok(KconfigState::NotSet));
-                    } else if line_parts.len() > 1 && !Self::is_comment(line_parts[0]) && line_parts[1].contains('=') {
+                    } else if line_parts.len() > 1
+                        && !Self::is_comment(line_parts[0])
+                        && line_parts[1].contains('=')
+                    {
                         let value = line_parts[1].split('=').collect::<Vec<&str>>()[1];
                         match value {
                             "y" => result.push(Ok(KconfigState::On)),
