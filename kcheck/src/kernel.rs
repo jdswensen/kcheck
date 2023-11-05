@@ -11,6 +11,20 @@ use nix::sys::utsname::uname;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+#[derive(Clone, Debug, Default)]
+pub enum KernelConfigSource {
+    #[default]
+    String,
+    File(PathBuf),
+    Stdin,
+}
+
+impl From<PathBuf> for KernelConfigSource {
+    fn from(path: PathBuf) -> Self {
+        KernelConfigSource::File(path)
+    }
+}
+
 impl FromStr for KernelConfig {
     type Err = KcheckError;
 
@@ -29,25 +43,11 @@ impl FromStr for KernelConfig {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub enum KernelConfigSource {
-    #[default]
-    String,
-    File(PathBuf),
-    Stdin,
-}
-
 /// A representation of a kernel config.
 #[derive(Clone, Debug, Default)]
 pub struct KernelConfig {
     src: KernelConfigSource,
     lines: Vec<String>,
-}
-
-impl From<PathBuf> for KernelConfigSource {
-    fn from(path: PathBuf) -> Self {
-        KernelConfigSource::File(path)
-    }
 }
 
 impl KernelConfig {
