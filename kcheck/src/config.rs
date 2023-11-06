@@ -167,3 +167,31 @@ impl IntoIterator for KcheckConfig {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn success_new_fragment() {
+        let test_name = "CONFIG_TEST_OPTION";
+        let test_reason = "Test reason";
+        let test_kernel_cfg = Vec::new();
+
+        let fragment = KcheckConfigFragment::new(
+            Some(test_name.to_string()),
+            Some(test_reason.to_string()),
+            test_kernel_cfg.clone(),
+        );
+
+        assert_eq!(fragment.name(), Some(test_name.to_string()));
+        assert_eq!(fragment.reason(), Some(test_reason.to_string()));
+        assert_eq!(fragment.kernel(), test_kernel_cfg);
+    }
+
+    #[test]
+    fn success_fragment_is_empty() {
+        let test_cfg = KcheckConfigFragment::default();
+        assert!(test_cfg.is_empty());
+    }
+}

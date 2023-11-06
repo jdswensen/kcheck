@@ -17,9 +17,10 @@ use serde::{Deserialize, Serialize};
 /// For example, there could be a requirement that a kernel config option be
 /// `Enabled` meaning that is present in the system but there is no desire to
 /// force it to be set to `y` or `m`.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub enum KconfigState {
     /// Kernel config option is not found
+    #[default]
     NotFound,
     /// Kernel config option is set to `is not set`
     NotSet,
@@ -42,7 +43,7 @@ pub enum KconfigState {
 /// A Kconfig option.
 ///
 /// Used to describe the desired state or value of kernel config options.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct KconfigOption {
     /// The name of the kernel config option.
     name: String,
