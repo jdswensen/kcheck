@@ -92,8 +92,6 @@ impl KernelConfig {
 
     /// Get the state of a kernel config option.
     pub fn get_option(&self, option: &str) -> KcheckResult<KconfigState> {
-        println!("option: {option:?}");
-
         // Superset of the option string
         // Used to rule out false positives
         let super_string = format!("{option}_");
