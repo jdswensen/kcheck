@@ -40,6 +40,18 @@ impl KcheckConfigFragment {
     pub fn is_empty(&self) -> bool {
         self.name.is_none() && self.reason.is_none() && self.kernel.is_empty()
     }
+
+    pub fn name(&self) -> Option<String> {
+        self.name.clone()
+    }
+
+    pub fn reason(&self) -> Option<String> {
+        self.reason.clone()
+    }
+
+    pub fn kernel(&self) -> Vec<KconfigOption> {
+        self.kernel.clone()
+    }
 }
 
 /// A structure representing a desired kernel checking configuration.
