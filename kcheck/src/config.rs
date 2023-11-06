@@ -79,7 +79,13 @@ impl KcheckConfig {
 
         // Collect all fragments into a single vector
         for item in files {
-            fragments.push(item.as_ref().to_string_lossy().to_string());
+            let item_path = item.as_ref().to_string_lossy().to_string();
+
+            if item.as_ref().exists() {
+                fragments.push(item_path);
+            } else {
+                return Err(KcheckError::FileDoesNotExist(item_path));
+            }
         }
 
         for fragment in fragments {
