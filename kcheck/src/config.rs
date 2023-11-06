@@ -17,7 +17,7 @@ use std::path::Path;
 /// A fragment represents a collection of config options that are potentially related.
 ///
 /// todo: custom deserialize, serialize
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct KcheckConfigFragment {
     /// Fragment name.
     name: Option<String>,
@@ -58,11 +58,11 @@ impl KcheckConfigFragment {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct KcheckConfig {
     /// Global `kcheck` config name.
-    name: Option<String>,
+    pub(crate) name: Option<String>,
     /// Global `kcheck` kernel options that have not been grouped into fragments.
-    kernel: Option<Vec<KconfigOption>>,
+    pub(crate) kernel: Option<Vec<KconfigOption>>,
     /// Groups of kernel options that are related.
-    fragment: Option<Vec<KcheckConfigFragment>>,
+    pub(crate) fragment: Option<Vec<KcheckConfigFragment>>,
 }
 
 impl KcheckConfig {
@@ -144,8 +144,12 @@ impl KcheckConfig {
         Ok(())
     }
 
-    fn add_fragment(&mut self, fragment: KcheckConfigFragment) {
-        todo!()
+    /// Add a config fragment to the `KcheckConfig` struct.
+    pub fn add_fragment(&mut self, fragment: KcheckConfigFragment) {
+        match self.fragment.as_mut() {
+            Some(f) => f.push(fragment),
+            None => self.fragment = Some(vec![fragment]),
+        }
     }
 
     /// Check if the config is empty.
@@ -199,5 +203,35 @@ mod test {
     fn success_fragment_is_empty() {
         let test_cfg = KcheckConfigFragment::default();
         assert!(test_cfg.is_empty());
+    }
+
+    #[test]
+    fn success_add_fragment_to_empty() {
+        let mut test_cfg = KcheckConfig::default();
+        test_cfg.name = Some("test".to_string());
+        let test_fragment = KcheckConfigFragment::default();
+
+        test_cfg.add_fragment(test_fragment.clone());
+        assert_eq!(test_cfg.fragment, Some(vec![test_fragment]));
+    }
+
+    #[test]
+    fn success_add_fragment_to_existing() {
+        let mut test_cfg = KcheckConfig::default();
+        test_cfg.name = Some("test".to_string());
+        let existing_fragment = KcheckConfigFragment::new(
+            Some("CONFIG_TEST_OPTION".to_string()),
+            Some("Test".to_string()),
+            Vec::new(),
+        );
+
+        let test_fragment = KcheckConfigFragment::default();
+
+        test_cfg.add_fragment(existing_fragment.clone());
+        test_cfg.add_fragment(test_fragment.clone());
+        assert_eq!(
+            test_cfg.fragment,
+            Some(vec![existing_fragment, test_fragment])
+        );
     }
 }
