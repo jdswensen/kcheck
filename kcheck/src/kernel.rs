@@ -307,6 +307,9 @@ mod test {
 
         let expected = KcheckError::UnknownKernelConfigOption("\"incorrect\"".to_string());
         helper_assert_option_state_err(&kernel_cfg, test_option, expected);
+
+        // On a failed option lookup via `get_option`, `check_option` should return false
+        assert!(!kernel_cfg.check_option(test_option, test_state));
     }
 
     #[test]
