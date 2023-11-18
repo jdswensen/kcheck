@@ -1,0 +1,5 @@
+---
+source: kcheck/src/kconfig.rs
+expression: kconfig_option
+---
+CONFIG_TEST_MODULE: Module

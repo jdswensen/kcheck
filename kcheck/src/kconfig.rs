@@ -34,10 +34,25 @@ pub enum KconfigState {
     Module,
     /// Kernel config is either `y` or `m`
     Enabled,
-    /// Kernel config is set to a value
-    Value(u64),
     /// Kernel config is set to a text string
     Text(String),
+}
+
+impl std::fmt::Display for KconfigState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text: &str = match self {
+            KconfigState::NotFound => "NotFound",
+            KconfigState::NotSet => "NotSet",
+            KconfigState::Off => "Off",
+            KconfigState::Disabled => "Disabled (NotFound, NotSet, or Off)",
+            KconfigState::On => "On",
+            KconfigState::Module => "Module",
+            KconfigState::Enabled => "Enabled (On or Module)",
+            KconfigState::Text(t) => &t,
+        };
+
+        write!(f, "{text}")
+    }
 }
 
 /// A Kconfig option.
@@ -49,6 +64,12 @@ pub struct KconfigOption {
     name: String,
     /// A state representing the value of the kernel config option.
     state: KconfigState,
+}
+
+impl std::fmt::Display for KconfigOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.name, self.state)
+    }
 }
 
 impl KconfigOption {
@@ -77,11 +98,22 @@ mod test {
 
     #[test]
     fn success_new() {
-        let test_option = "CONFIG_TEST_OPTION";
-        let test_state = KconfigState::On;
+        let test_array = [
+            ("CONFIG_TEST_NOT_FOUND", KconfigState::NotFound),
+            ("CONFIG_TEST_NOT_SET", KconfigState::NotSet),
+            ("CONFIG_TEST_OFF", KconfigState::Off),
+            ("CONFIG_TEST_DISABLED", KconfigState::Disabled),
+            ("CONFIG_TEST_ON", KconfigState::On),
+            ("CONFIG_TEST_MODULE", KconfigState::Module),
+            ("CONFIG_TEST_ENABLED", KconfigState::Enabled),
+            ("CONFIG_TEST_TEXT", KconfigState::Text("test".to_string())),
+        ];
 
-        let option = KconfigOption::new(test_option, test_state.clone());
-        assert_eq!(option.name(), test_option);
-        assert_eq!(option.state(), test_state);
+        for (option, state) in test_array {
+            let kconfig_option = KconfigOption::new(option, state.clone());
+            assert_eq!(kconfig_option.name(), option);
+            assert_eq!(kconfig_option.state(), state);
+            insta::assert_display_snapshot!(kconfig_option);
+        }
     }
 }

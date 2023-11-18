@@ -18,4 +18,5 @@ toml.workspace = true
 kcheck-utils.workspace = true
 
 [dev-dependencies]
+insta.workspace = true
 rand.workspace = true

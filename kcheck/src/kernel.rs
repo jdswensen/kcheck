@@ -202,7 +202,6 @@ impl KernelConfigBuilder {
             KconfigState::Off | KconfigState::Disabled => format!("{option}=n"),
             KconfigState::On | KconfigState::Enabled => format!("{option}=y"),
             KconfigState::Module => format!("{option}=m"),
-            KconfigState::Value(v) => todo!(),
             KconfigState::Text(s) => format!("{option}=\"{s}\""),
         };
 
