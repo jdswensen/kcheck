@@ -8,7 +8,7 @@
 //! A tool for developing and debugging kernel config options.
 
 use kcheck::config::KcheckConfig;
-use kcheck::kernel::KernelConfig;
+use kcheck::kernel::KernelConfigBuilder;
 use std::path::PathBuf;
 
 fn main() {
@@ -29,6 +29,9 @@ fn main() {
     let cfg = KcheckConfig::generate(files);
     println!("{cfg:#?}");
 
-    let kernel_cfg = KernelConfig::try_from_system().unwrap();
+    let kernel_cfg = KernelConfigBuilder::default()
+        .system()
+        .build()
+        .expect("Failed to build kernel config from system");
     println!("{kernel_cfg:#?}");
 }

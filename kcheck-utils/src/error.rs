@@ -21,6 +21,8 @@ pub enum KcheckError {
     IoError(String),
     #[error("Error parsing json file: {0}")]
     JsonParseError(String),
+    #[error("Error building KernelConfig: {0}")]
+    KernelConfigBuildError(String),
     #[error("Kernel config not found")]
     KernelConfigNotFound,
     #[error("Kernel config parse error")]
