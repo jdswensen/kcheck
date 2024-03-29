@@ -41,14 +41,17 @@ impl KcheckConfigFragment {
         self.name.is_none() && self.reason.is_none() && self.kernel.is_empty()
     }
 
+    /// Fragment name.
     pub fn name(&self) -> Option<String> {
         self.name.clone()
     }
 
+    /// A short description of the reason fragment options are selected.
     pub fn reason(&self) -> Option<String> {
         self.reason.clone()
     }
 
+    /// A list of kernel options that are a part of this fragment.
     pub fn kernel(&self) -> Vec<KconfigOption> {
         self.kernel.clone()
     }
