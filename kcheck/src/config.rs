@@ -12,6 +12,9 @@ use serde_json;
 use std::ffi::OsStr;
 use std::path::Path;
 
+const ETC_KCHECK_TOML: &'static str = "/etc/kcheck.toml";
+const ETC_KCHECK_JSON: &'static str = "/etc/kcheck.json";
+
 /// A fragment of a `kcheck` config file.
 ///
 /// A fragment represents a collection of config options that are potentially related.
@@ -75,10 +78,7 @@ impl KcheckConfig {
         let mut collection: Vec<Self> = Vec::new();
 
         // Known config file locations
-        let mut fragments = vec![
-            "/etc/kcheck.toml".to_string(),
-            "/etc/kcheck.json".to_string(),
-        ];
+        let mut fragments = vec![ETC_KCHECK_TOML.to_owned(), ETC_KCHECK_JSON.to_owned()];
 
         // Collect all fragments into a single vector
         for item in files {
