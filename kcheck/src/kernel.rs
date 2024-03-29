@@ -91,7 +91,7 @@ impl KernelConfigFileInfo {
     fn try_boot_config_release() -> KcheckResult<Option<Self>> {
         let boot_config_release: PathBuf = match uname()
             .ok()
-            .and_then(|u| Some(u.release().to_owned()))
+            .map(|u| u.release().to_owned())
             .map(|r| format!("{}-{}", Self::BOOT_CONFIG, r.to_string_lossy()))
         {
             Some(s) => Ok(PathBuf::from(s)),
