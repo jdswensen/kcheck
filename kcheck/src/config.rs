@@ -69,7 +69,7 @@ pub struct KcheckConfig {
 }
 
 impl KcheckConfig {
-    /// Generate a single `KcheckConfig` object from a collection of config files.
+    /// Generate a single [`KcheckConfig`] object from a collection of config files.
     pub fn generate<P: AsRef<Path>>(files: Vec<P>) -> KcheckResult<Self> {
         // collection of config files and fragments
         let mut collection: Vec<Self> = Vec::new();
@@ -131,7 +131,7 @@ impl KcheckConfig {
 
     /// Move all the configuration data from `other` into `self`.
     ///
-    /// The resulting `KcheckConfig` object will have the global name from
+    /// The resulting [`KcheckConfig`] object will have the global name from
     /// `self`.
     pub fn append(&mut self, other: &mut Self) {
         let new_kernel =
@@ -147,7 +147,7 @@ impl KcheckConfig {
         Ok(())
     }
 
-    /// Add a config fragment to the `KcheckConfig` struct.
+    /// Add a config fragment to the [`KcheckConfig`] struct.
     pub fn add_fragment(&mut self, fragment: KcheckConfigFragment) {
         match self.fragment.as_mut() {
             Some(f) => f.push(fragment),
