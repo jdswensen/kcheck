@@ -1,8 +1,11 @@
-/target
-/Cargo.lock
+# Rust
+**/Cargo.lock
+**/target
 
+# Tooling
+**/.vscode
+
+# Coverage data
 *.profraw
 *.profdata
 **coverage/*
-
-/.vscode
