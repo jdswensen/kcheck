@@ -48,7 +48,7 @@ impl std::fmt::Display for KconfigState {
             KconfigState::On => "On",
             KconfigState::Module => "Module",
             KconfigState::Enabled => "Enabled (On or Module)",
-            KconfigState::Text(t) => &t,
+            KconfigState::Text(t) => t,
         };
 
         write!(f, "{text}")
