@@ -7,6 +7,7 @@
 
 use crate::error::{KcheckError, KcheckResult};
 use crate::kconfig::KconfigOption;
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::ffi::OsStr;
@@ -20,7 +21,7 @@ const ETC_KCHECK_JSON: &'static str = "/etc/kcheck.json";
 /// A fragment represents a collection of config options that are potentially related.
 ///
 /// todo: custom deserialize, serialize
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Builder, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct KcheckConfigFragment {
     /// Fragment name.
     name: Option<String>,
@@ -61,7 +62,8 @@ impl KcheckConfigFragment {
 }
 
 /// A structure representing a desired kernel checking configuration.
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Builder, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[builder(build_fn(error = "KcheckError"))]
 pub struct KcheckConfig {
     /// Global `kcheck` config name.
     pub(crate) name: Option<String>,

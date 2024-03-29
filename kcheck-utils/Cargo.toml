@@ -9,6 +9,7 @@ repository.workspace = true
 edition.workspace = true
 
 [dependencies]
+derive_builder.workspace = true
 flate2.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
