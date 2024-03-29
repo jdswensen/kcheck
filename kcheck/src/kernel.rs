@@ -248,9 +248,11 @@ impl KernelConfigBuilder {
                         "No config file information found".to_string(),
                     ))
                 } else {
-                    let mut config = KernelConfig::default();
-                    config.lines = self.lines;
-                    Ok(config)
+                    let lines = self.lines;
+                    Ok(KernelConfig {
+                        lines,
+                        ..Default::default()
+                    })
                 }
             }
         }
