@@ -9,7 +9,7 @@ use thiserror::Error;
 
 pub type KcheckResult<T> = Result<T, KcheckError>;
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Clone, Debug, Error, PartialEq)]
 pub enum KcheckError {
     #[error("Duplicate config found: {0}")]
     DuplicateConfig(String),
