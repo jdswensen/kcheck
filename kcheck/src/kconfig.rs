@@ -113,7 +113,7 @@ mod test {
             let kconfig_option = KconfigOption::new(option, state.clone());
             assert_eq!(kconfig_option.name(), option);
             assert_eq!(kconfig_option.state(), state);
-            insta::assert_display_snapshot!(kconfig_option);
+            insta::assert_snapshot!(kconfig_option);
         }
     }
 }
