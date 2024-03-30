@@ -16,11 +16,9 @@ use std::path::Path;
 const ETC_KCHECK_TOML: &'static str = "/etc/kcheck.toml";
 const ETC_KCHECK_JSON: &'static str = "/etc/kcheck.json";
 
-/// A fragment of a `kcheck` config file.
+/// A fragment of a [`KcheckConfig`].
 ///
 /// A fragment represents a collection of config options that are potentially related.
-///
-/// todo: custom deserialize, serialize
 #[derive(Builder, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct KcheckConfigFragment {
     /// Fragment name.
