@@ -30,10 +30,10 @@ pub struct KcheckConfigFragment {
 }
 
 impl KcheckConfigFragment {
-    pub fn new(name: Option<String>, reason: Option<String>, kernel: Vec<KconfigOption>) -> Self {
+    pub fn new(name: String, reason: String, kernel: Vec<KconfigOption>) -> Self {
         KcheckConfigFragment {
-            name,
-            reason,
+            name: Some(name),
+            reason: Some(reason),
             kernel,
         }
     }
@@ -194,8 +194,8 @@ mod test {
         let test_kernel_cfg = Vec::new();
 
         let fragment = KcheckConfigFragment::new(
-            Some(test_name.to_string()),
-            Some(test_reason.to_string()),
+            test_name.to_string(),
+            test_reason.to_string(),
             test_kernel_cfg.clone(),
         );
 
@@ -225,8 +225,8 @@ mod test {
         let mut test_cfg = KcheckConfig::default();
         test_cfg.name = Some("test".to_string());
         let existing_fragment = KcheckConfigFragment::new(
-            Some("CONFIG_TEST_OPTION".to_string()),
-            Some("Test".to_string()),
+            "CONFIG_TEST_OPTION".to_string(),
+            "Test".to_string(),
             Vec::new(),
         );
 
