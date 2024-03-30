@@ -8,6 +8,7 @@
 use crate::{
     error::{KcheckError, KcheckResult},
     kconfig::KconfigState,
+    util,
 };
 use nix::sys::utsname::uname;
 use std::{
@@ -173,8 +174,8 @@ impl KernelConfigBuilder {
         let inflate = info.1;
 
         let contents = match inflate {
-            RequiresInflate::True => kcheck_utils::inflate_gzip_file(path.clone())?,
-            RequiresInflate::False => kcheck_utils::file_contents_as_string(path.clone())?,
+            RequiresInflate::True => util::inflate_gzip_file(path.clone())?,
+            RequiresInflate::False => util::file_contents_as_string(path.clone())?,
         };
 
         let mut config = KernelConfig::from_str(contents.as_str())?;
