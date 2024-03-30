@@ -157,7 +157,9 @@ impl KcheckConfig {
         }
     }
 
-    /// Check if the config is empty.
+    /// Returns `true` if the [`KcheckConfig`] is empty.
+    ///
+    /// An empty [`KcheckConfig`] has no name, kernel options, or fragments.
     fn is_empty(&self) -> bool {
         let fragment_is_empty = match &self.fragment {
             Some(f) => f.is_empty(),
