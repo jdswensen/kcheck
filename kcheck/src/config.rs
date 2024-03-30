@@ -5,13 +5,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::error::{KcheckError, KcheckResult};
-use crate::kconfig::KconfigOption;
+use crate::{
+    error::{KcheckError, KcheckResult},
+    kconfig::KconfigOption,
+};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use std::ffi::OsStr;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 const ETC_KCHECK_TOML: &'static str = "/etc/kcheck.toml";
 const ETC_KCHECK_JSON: &'static str = "/etc/kcheck.json";

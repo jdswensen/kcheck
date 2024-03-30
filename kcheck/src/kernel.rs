@@ -5,12 +5,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use crate::error::{KcheckError, KcheckResult};
-use crate::kconfig::KconfigState;
+use crate::{
+    error::{KcheckError, KcheckResult},
+    kconfig::KconfigState,
+};
 use nix::sys::utsname::uname;
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 /// Meta file information for a kernel config file.
 #[derive(Clone, Debug, Default)]

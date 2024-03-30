@@ -9,8 +9,7 @@ pub mod error;
 
 use error::{KcheckError, KcheckResult};
 use flate2::read::GzDecoder;
-use std::io::Read;
-use std::path::Path;
+use std::{io::Read, path::Path};
 
 /// Inflate a gzip'd file into a string.
 pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
