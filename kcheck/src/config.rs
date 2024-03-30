@@ -173,16 +173,6 @@ impl KcheckConfig {
     }
 }
 
-impl IntoIterator for KcheckConfig {
-    type Item = (KconfigOption, String);
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        // return (KconfigOption, "reason")
-        todo!()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
