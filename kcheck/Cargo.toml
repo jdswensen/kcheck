@@ -20,4 +20,6 @@ kcheck-utils.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
+lazy_static.workspace = true
 rand.workspace = true
+tempfile.workspace = true

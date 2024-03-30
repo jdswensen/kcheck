@@ -186,6 +186,83 @@ impl IntoIterator for KcheckConfig {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::kconfig::{KconfigOption, KconfigState};
+    use lazy_static::lazy_static;
+    use std::{fs::File, path::PathBuf};
+    use tempfile;
+
+    const TEST_REASON: &str = "Testing";
+    const TEST_GLOBAL_NAME: &str = "GLOBAL_TEST";
+    const TEST_FRAGMENT_NAME: &str = "TEST_FRAGMENT";
+    const TEST_FRAGMENT_NAME_TWO: &str = "TEST_FRAGMENT_TWO";
+    const TEST_FRAGMENT_CONFIG_ON: &str = "CONFIG_TEST_OPTION_ON";
+    const TEST_FRAGMENT_CONFIG_OFF: &str = "CONFIG_TEST_OPTION_OFF";
+    const TEST_FRAGMENT_CONFIG_MODULE: &str = "CONFIG_TEST_OPTION_MODULE";
+
+    const EXPECTED_FILE_CONTENTS: &str = r#"
+    name = "GLOBAL_TEST"
+
+    [[fragment]]
+    name = "TEST_FRAGMENT"
+    reason = "Testing"
+
+    [[fragment.kernel]]
+    name = "CONFIG_TEST_OPTION_ON"
+    state = "On"
+
+    [[fragment.kernel]]
+    name = "CONFIG_TEST_OPTION_OFF"
+    state = "Off"
+
+    [[fragment]]
+    name = "TEST_FRAGMENT_TWO"
+    reason = "Testing"
+
+    [[fragment.kernel]]
+    name = "CONFIG_TEST_OPTION_MODULE"
+    state = "Module"
+    "#;
+
+    lazy_static! {
+        static ref TEST_FRAGMENT_ON: KconfigOption =
+            KconfigOption::new(TEST_FRAGMENT_CONFIG_ON, KconfigState::On);
+        static ref TEST_FRAGMENT_OFF: KconfigOption =
+            KconfigOption::new(TEST_FRAGMENT_CONFIG_OFF, KconfigState::Off);
+        static ref TEST_FRAGMENT_MODULE: KconfigOption =
+            KconfigOption::new(TEST_FRAGMENT_CONFIG_MODULE, KconfigState::Module);
+        static ref EXPECTED_KCHECK_CONFIG: KcheckConfig = KcheckConfig {
+            name: Some(TEST_GLOBAL_NAME.to_string()),
+            kernel: None,
+            fragment: Some(vec![
+                KcheckConfigFragment::new(
+                    TEST_FRAGMENT_NAME.to_string(),
+                    TEST_REASON.to_owned(),
+                    vec![TEST_FRAGMENT_ON.clone(), TEST_FRAGMENT_OFF.clone()]
+                ),
+                KcheckConfigFragment::new(
+                    TEST_FRAGMENT_NAME_TWO.to_string(),
+                    TEST_REASON.to_string(),
+                    vec![TEST_FRAGMENT_MODULE.clone()]
+                )
+            ])
+        };
+    }
+
+    fn run_with_tmpfile<F>(filename: &str, contents: &str, f: F)
+    where
+        F: FnOnce(PathBuf),
+    {
+        use std::io::Write;
+        let tmpdir = tempfile::tempdir().expect("Failed to create temp dir");
+
+        let file_path = tmpdir.as_ref().join(filename);
+        File::create(&file_path)
+            .expect("Failed to create temp file")
+            .write_all(contents.as_bytes())
+            .expect("Failed to write to temp file");
+
+        f(file_path);
+    }
 
     #[test]
     fn success_new_fragment() {
@@ -208,6 +285,12 @@ mod test {
     fn success_fragment_is_empty() {
         let test_cfg = KcheckConfigFragment::default();
         assert!(test_cfg.is_empty());
+    }
+
+    #[test]
+    fn fail_kconfig_builder_no_config() {
+        let test_cfg = KcheckConfigBuilder::default().build();
+        assert!(matches!(test_cfg, Err(KcheckError::UninitializedField(_))));
     }
 
     #[test]
@@ -238,5 +321,14 @@ mod test {
             test_cfg.fragment,
             Some(vec![existing_fragment, test_fragment])
         );
+    }
+
+    #[test]
+    fn success_kconfig_builder_with_file() {
+        run_with_tmpfile("test.toml", EXPECTED_FILE_CONTENTS, |file_path| {
+            let cfg =
+                KcheckConfig::try_from_file(file_path).expect("Failed to build config from file");
+            assert_eq!(cfg, *EXPECTED_KCHECK_CONFIG);
+        });
     }
 }
