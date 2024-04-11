@@ -7,7 +7,7 @@
 
 use crate::{
     error::{KcheckError, KcheckResult},
-    kconfig::KconfigOption,
+    kconfig::{KconfigOption, KconfigState},
     util,
 };
 use derive_builder::Builder;
@@ -170,6 +170,30 @@ impl KcheckConfig {
         };
 
         self.name.is_none() && kernel_is_empty && fragment_is_empty
+    }
+}
+
+impl IntoIterator for KcheckConfig {
+    type Item = (String, KconfigState);
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut kernel: Vec<KconfigOption> = match self.kernel {
+            Some(k) => k,
+            None => Vec::new(),
+        };
+
+        let fragments = match self.fragment {
+            Some(f) => f.into_iter().flat_map(|f| f.kernel.into_iter()).collect(),
+            None => Vec::new(),
+        };
+
+        kernel.extend(fragments);
+        kernel
+            .iter()
+            .map(|f| (f.name().clone(), f.state()))
+            .collect::<Vec<(String, KconfigState)>>()
+            .into_iter()
     }
 }
 
