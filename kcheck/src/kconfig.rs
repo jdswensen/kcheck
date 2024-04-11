@@ -38,6 +38,30 @@ pub enum KconfigState {
     Text(String),
 }
 
+impl KconfigState {
+    pub fn check(&self, other: KconfigState) -> bool {
+        match self {
+            KconfigState::NotFound
+            | KconfigState::NotSet
+            | KconfigState::Off
+            | KconfigState::Disabled => {
+                other == KconfigState::NotFound
+                    || other == KconfigState::NotSet
+                    || other == KconfigState::Off
+                    || other == KconfigState::Disabled
+            }
+            KconfigState::On => other == KconfigState::On,
+            KconfigState::Module => other == KconfigState::Module,
+            KconfigState::Enabled => {
+                other == KconfigState::On
+                    || other == KconfigState::Module
+                    || other == KconfigState::Enabled
+            }
+            KconfigState::Text(t) => other == KconfigState::Text(t.clone()),
+        }
+    }
+}
+
 impl std::fmt::Display for KconfigState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text: &str = match self {
