@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::{ffi::OsStr, path::Path};
 
-const ETC_KCHECK_TOML: &'static str = "/etc/kcheck.toml";
-const ETC_KCHECK_JSON: &'static str = "/etc/kcheck.json";
+const ETC_KCHECK_TOML: &str = "/etc/kcheck.toml";
+const ETC_KCHECK_JSON: &str = "/etc/kcheck.json";
 
 /// A fragment of a [`KcheckConfig`].
 ///
