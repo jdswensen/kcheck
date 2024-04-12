@@ -7,6 +7,7 @@
 
 //! A tool for developing and debugging kernel config options.
 
+use cli_table::WithTitle;
 use kcheck::config::KcheckConfig;
 use kcheck::kernel::KernelConfigBuilder;
 use std::path::PathBuf;
@@ -24,9 +25,9 @@ fn main() {
         .join("kcheck-random.toml");
     println!("{kcheck_random:?}");
 
-    let files = vec![kcheck_serial, kcheck_random];
+    let files = vec![kcheck_serial];
 
-    let cfg = KcheckConfig::generate(files);
+    let cfg = KcheckConfig::generate(files.clone());
     println!("{cfg:#?}");
 
     let kernel_cfg = KernelConfigBuilder::default()
@@ -34,4 +35,14 @@ fn main() {
         .build()
         .expect("Failed to build kernel config from system");
     println!("{kernel_cfg:#?}");
+
+    let system = kcheck::Kcheck::new_from_system(files).unwrap();
+
+    let results = system.perform_check().unwrap();
+    for result in results.clone() {
+        println!("{result:#?}");
+    }
+
+    let table = results.with_title().display().unwrap();
+    println!("{}", table);
 }
