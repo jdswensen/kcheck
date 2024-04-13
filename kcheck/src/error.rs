@@ -32,6 +32,8 @@ pub enum KcheckError {
     MissingFileExtension,
     #[error("Could not find a config file")]
     NoConfig,
+    #[error("Regex error: {0}")]
+    Regex(#[from] regex::Error),
     #[error("Error parsing toml file: {0}")]
     TomlParseError(#[from] toml::de::Error),
     #[error("Uninitialized field: {0}")]

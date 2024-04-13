@@ -11,6 +11,7 @@ use crate::{
     util,
 };
 use nix::sys::utsname::uname;
+use regex::Regex;
 use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
@@ -274,15 +275,14 @@ pub struct KernelConfig {
 impl KernelConfig {
     /// Get the state of a kernel config option.
     pub fn option(&self, option: &str) -> KcheckResult<KconfigState> {
-        // Superset of the option string
-        // Used to rule out false positives
-        let super_string = format!("{option}_");
+        let option_string = format!("{option}\\b");
+        let search = Regex::new(&option_string)?;
 
         // Seach the config for the desired option and store the result
-        let mut found_state: Vec<KcheckResult<KconfigState>> = self.lines.iter().fold(
-            Vec::<KcheckResult<KconfigState>>::new(),
-            |mut result, line| {
-                if line.contains(option) && !line.contains(&super_string) {
+        let mut found_state: Vec<KcheckResult<KconfigState>> =
+            self.lines.iter().filter(|l| search.is_match(l)).fold(
+                Vec::<KcheckResult<KconfigState>>::new(),
+                |mut result, line| {
                     // The config option has been found, now split up the line
                     let line_parts: Vec<&str> = line.split_inclusive(option).collect();
 
@@ -303,11 +303,10 @@ impl KernelConfig {
                     } else {
                         result.push(Err(KcheckError::KernelConfigParseError))
                     }
-                }
 
-                result
-            },
-        );
+                    result
+                },
+            );
 
         // Parse results
         match found_state.len() {
@@ -628,5 +627,23 @@ mod test {
             .build();
 
         assert!(cfg.is_err());
+    }
+
+    #[test]
+    fn success_does_not_match_on_similar() {
+        let test_file_contents =
+            "CONFIG_RANDOMIZE_BASE=y\nCONFIG_RANDOMIZE_MODULE_REGION_FULL=y\nCONFIG_RANDOM=y";
+        let test_option = "CONFIG_RANDOM";
+
+        util::run_with_tmpfile("config", test_file_contents, |path| {
+            let kernel_cfg = KernelConfigBuilder::default()
+                .user(path)
+                .build()
+                .expect("Expected to build a kernel config");
+
+            let result = kernel_cfg.option(test_option);
+            assert!(!matches!(result, Err(KcheckError::DuplicateConfig(_))));
+            assert_eq!(result.unwrap(), KconfigState::On);
+        });
     }
 }
