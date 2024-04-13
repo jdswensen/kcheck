@@ -13,4 +13,4 @@ edition.workspace = true
 [dependencies]
 clap.workspace = true
 cli-table.workspace = true
-kcheck = { version = "0.1.3", path = "../kcheck" }
+kcheck = { version = "0.2.0", path = "../kcheck" }

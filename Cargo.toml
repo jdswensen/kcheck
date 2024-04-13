@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.3"
+version = "0.2.0"
 license = "MPL-2.0"
 authors = ["Jake Swensen <jake@swensen.io>"]
 keywords = ["kernel", "kconfig", "linux", "embedded"]
