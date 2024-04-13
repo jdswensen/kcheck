@@ -202,8 +202,6 @@ mod test {
     use super::*;
     use crate::kconfig::{KconfigOption, KconfigState};
     use lazy_static::lazy_static;
-    use std::{fs::File, path::PathBuf};
-    use tempfile;
 
     const TEST_REASON: &str = "Testing";
     const TEST_GLOBAL_NAME: &str = "GLOBAL_TEST";
@@ -260,22 +258,6 @@ mod test {
                 )
             ])
         };
-    }
-
-    fn run_with_tmpfile<F>(filename: &str, contents: &str, f: F)
-    where
-        F: FnOnce(PathBuf),
-    {
-        use std::io::Write;
-        let tmpdir = tempfile::tempdir().expect("Failed to create temp dir");
-
-        let file_path = tmpdir.as_ref().join(filename);
-        File::create(&file_path)
-            .expect("Failed to create temp file")
-            .write_all(contents.as_bytes())
-            .expect("Failed to write to temp file");
-
-        f(file_path);
     }
 
     #[test]
@@ -339,7 +321,7 @@ mod test {
 
     #[test]
     fn success_kconfig_builder_with_file() {
-        run_with_tmpfile("test.toml", EXPECTED_FILE_CONTENTS, |file_path| {
+        util::run_with_tmpfile("test.toml", EXPECTED_FILE_CONTENTS, |file_path| {
             let cfg =
                 KcheckConfig::try_from_file(file_path).expect("Failed to build config from file");
             assert_eq!(cfg, *EXPECTED_KCHECK_CONFIG);

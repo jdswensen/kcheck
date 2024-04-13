@@ -9,6 +9,23 @@ use crate::error::{KcheckError, KcheckResult};
 use flate2::read::GzDecoder;
 use std::{io::Read, path::Path};
 
+#[cfg(test)]
+pub(crate) fn run_with_tmpfile<F>(filename: &str, contents: &str, f: F)
+where
+    F: FnOnce(std::path::PathBuf),
+{
+    use std::io::Write;
+    let tmpdir = tempfile::tempdir().expect("Failed to create temp dir");
+
+    let file_path = tmpdir.as_ref().join(filename);
+    std::fs::File::create(&file_path)
+        .expect("Failed to create temp file")
+        .write_all(contents.as_bytes())
+        .expect("Failed to write to temp file");
+
+    f(file_path);
+}
+
 /// Inflate a gzip'd file into a string.
 pub fn inflate_gzip_file<P: AsRef<Path>>(path: P) -> KcheckResult<String> {
     let contents = file_contents_as_bytes(path)?;
