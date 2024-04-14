@@ -154,6 +154,7 @@ pub(crate) enum RequiresInflate {
     False,
 }
 
+/// Construct a [`KernelConfig`] object.
 #[derive(Clone, Debug, Default)]
 pub struct KernelConfigBuilder {
     /// Path to the user provided kernel config file.
@@ -316,10 +317,12 @@ impl KernelConfig {
         }
     }
 
+    /// Check the line for the phrase "is not set".
     fn contains_is_not_set(option: &str) -> bool {
         option.contains("is not set")
     }
 
+    /// Check the start of a line for a `#` character.
     fn is_comment(line: &str) -> bool {
         line.starts_with('#')
     }
