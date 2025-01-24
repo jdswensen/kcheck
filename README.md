@@ -8,8 +8,8 @@
 [crates-url]: https://crates.io/crates/kcheck
 [mpl-badge]: https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg
 [mpl-url]: https://github.com/jdswensen/kcheck/blob/main/LICENSE
-[actions-badge]: https://github.com/jdswensen/kcheck/workflows/CI/badge.svg
-[actions-url]: https://img.shields.io/github/actions/workflow/status/jdswensen/kcheck/ci.yml?branch=main
+[actions-badge]: https://img.shields.io/github/actions/workflow/status/jdswensen/kcheck/ci.yml?branch=main
+[actions-url]: https://github.com/jdswensen/kcheck/actions/workflows/ci.yml?query=workflow%3ACI+branch%3Amain
 
 todo: links to build, crates, license
 
