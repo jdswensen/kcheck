@@ -10,13 +10,13 @@ use crate::{
     kconfig::{KconfigOption, KconfigState},
     util,
 };
-use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
 };
+use typed_builder::TypedBuilder;
 
 const ETC_KCHECK_TOML: &str = "/etc/kcheck.toml";
 const ETC_KCHECK_JSON: &str = "/etc/kcheck.json";
@@ -24,7 +24,7 @@ const ETC_KCHECK_JSON: &str = "/etc/kcheck.json";
 /// A fragment of a [`KcheckConfig`].
 ///
 /// A fragment represents a collection of config options that are potentially related.
-#[derive(Builder, Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, TypedBuilder)]
 pub struct KcheckConfigFragment {
     /// Fragment name.
     name: Option<String>,
@@ -64,7 +64,7 @@ impl KcheckConfigFragment {
     }
 }
 
-#[derive(Builder, Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, TypedBuilder)]
 pub struct KcheckConfigBuilder {
     name: Option<String>,
     kernel: Option<Vec<KconfigOption>>,

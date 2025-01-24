@@ -13,7 +13,7 @@ default = ["cli-table"]
 
 [dependencies]
 cli-table = { workspace = true, optional = true }
-derive_builder.workspace = true
+typed-builder.workspace = true
 flate2.workspace = true
 nix.workspace = true
 regex.workspace = true
