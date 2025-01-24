@@ -9,6 +9,7 @@ use crate::error::{KcheckError, KcheckResult};
 use flate2::read::GzDecoder;
 use std::{io::Read, path::Path};
 
+/// Create a temporary file with the given contents and run a function with the file path.
 #[cfg(test)]
 pub(crate) fn run_with_tmpfile<F>(filename: &str, contents: &str, f: F)
 where

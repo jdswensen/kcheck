@@ -5,7 +5,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use derive_builder::UninitializedFieldError;
 use thiserror::Error;
 
 pub type KcheckResult<T> = Result<T, KcheckError>;
@@ -36,8 +35,6 @@ pub enum KcheckError {
     Regex(#[from] regex::Error),
     #[error("Error parsing toml file: {0}")]
     TomlParseError(#[from] toml::de::Error),
-    #[error("Uninitialized field: {0}")]
-    UninitializedField(String),
     #[error("Unknown file type: {0}")]
     UnknownFileType(String),
     #[error("Unknown kernel config option: {0}")]
@@ -53,11 +50,5 @@ impl From<std::io::Error> for KcheckError {
 impl From<serde_json::Error> for KcheckError {
     fn from(e: serde_json::Error) -> Self {
         KcheckError::JsonParseError(e.to_string())
-    }
-}
-
-impl From<UninitializedFieldError> for KcheckError {
-    fn from(e: UninitializedFieldError) -> Self {
-        KcheckError::UninitializedField(e.to_string())
     }
 }

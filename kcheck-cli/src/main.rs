@@ -7,6 +7,7 @@
 
 use clap::Parser;
 use cli_table::WithTitle;
+use kcheck::KcheckBuilder;
 use std::path::PathBuf;
 
 /// A tool for developing and debugging kernel config options.
@@ -25,9 +26,14 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let kcheck = match args.kconfig.clone() {
-        Some(k) => kcheck::Kcheck::new_from_user(args.configs.clone(), k),
-        None => kcheck::Kcheck::new_from_system(args.configs.clone()),
+    let builder = KcheckBuilder::default();
+    let configs = args.configs;
+    let kcheck = match args.kconfig {
+        Some(k) => builder
+            .kernel_fragments(vec![k])
+            .config_fragments(configs)
+            .build(),
+        None => builder.system_kernel().config_fragments(configs).build(),
     };
 
     let system = match kcheck {
