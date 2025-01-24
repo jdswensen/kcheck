@@ -22,6 +22,7 @@
 
 #[cfg(feature = "cli-table")]
 use cli_table::{CellStruct, Color, Style, Table};
+use std::path::PathBuf;
 
 pub mod config;
 pub mod error;
@@ -29,13 +30,12 @@ pub mod kconfig;
 pub mod kernel;
 mod util;
 
-use config::KcheckConfig;
+use config::{KcheckConfig, KcheckConfigBuilder};
 pub use error::{KcheckError, KcheckResult};
 use kconfig::KconfigState;
 use kernel::{KernelConfig, KernelConfigBuilder};
-use std::path::Path;
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
 enum CheckResult {
     Pass,
     #[default]
@@ -83,29 +83,84 @@ fn convert_check_result(cell: CellStruct, result: &CheckResult) -> CellStruct {
     }
 }
 
+/// Build a new [`Kcheck`] instance.
+#[derive(Clone, Debug, Default)]
+pub struct KcheckBuilder {
+    use_system_kernel: bool,
+    user_kernel_files: Vec<PathBuf>,
+
+    use_system_config: bool,
+    user_config_files: Vec<PathBuf>,
+}
+
+impl KcheckBuilder {
+    /// Add new Kconfig parameters using the system's running kernel config.
+    pub fn system_kernel(mut self) -> Self {
+        self.use_system_kernel = true;
+        self
+    }
+
+    /// Add new Kconfig parameters using a user-provided kernel config file.
+    pub fn kernel_fragments(mut self, files: Vec<PathBuf>) -> Self {
+        self.user_kernel_files.extend(files);
+        self
+    }
+
+    /// Add new config parameters using the system's config files stored in the `/etc/` directory.
+    pub fn system_config(mut self) -> Self {
+        self.use_system_config = true;
+        self
+    }
+
+    /// Add new config parameters using a user-provided config file.
+    pub fn config_fragments(mut self, files: Vec<PathBuf>) -> Self {
+        self.user_config_files.extend(files);
+        self
+    }
+
+    /// Build the [`Kcheck`] instance using the provided configuration.
+    pub fn build(self) -> KcheckResult<Kcheck> {
+        // Gather all the kernel configuration files
+        let mut user_kernel_config_builder = KernelConfigBuilder::default();
+        if self.use_system_kernel {
+            user_kernel_config_builder = user_kernel_config_builder.system();
+        };
+
+        if !self.user_kernel_files.is_empty() {
+            for file in self.user_kernel_files {
+                user_kernel_config_builder = user_kernel_config_builder.user(file);
+            }
+        }
+
+        let user_kernel_config = user_kernel_config_builder.build()?;
+
+        // Gather all the Kcheck configuration files
+        let mut kcheck_config_builder = KcheckConfigBuilder::default();
+        if self.use_system_config {
+            kcheck_config_builder = kcheck_config_builder.system();
+        };
+
+        let kcheck_config = kcheck_config_builder
+            .config_files(self.user_config_files)
+            .build()?;
+
+        Ok(Kcheck::new(kcheck_config, user_kernel_config))
+    }
+}
+
+#[derive(Default)]
 pub struct Kcheck {
+    /// The desired kernel configuration options to check against.
     config: KcheckConfig,
+
+    /// The kernel configuration to check.
     kernel: KernelConfig,
 }
 
 impl Kcheck {
-    /// Create a new [`Kcheck`] instance from the running system's kernel config.
-    pub fn new_from_system<P: AsRef<Path>>(fragments: Vec<P>) -> KcheckResult<Self> {
-        let config = KcheckConfig::generate(fragments)?;
-        let kernel = KernelConfigBuilder::default().system().build()?;
-
-        Ok(Self { config, kernel })
-    }
-
-    /// Create a new [`Kcheck`] instance from a user-provided kernel config.
-    pub fn new_from_user<P: AsRef<Path>, K: AsRef<Path>>(
-        fragments: Vec<P>,
-        kernel: K,
-    ) -> KcheckResult<Self> {
-        let config = KcheckConfig::generate(fragments)?;
-        let kernel = KernelConfigBuilder::default().user(kernel).build()?;
-
-        Ok(Self { config, kernel })
+    /// Create a new [`Kcheck`] instance with previously defined configuration.
+    pub fn new(config: KcheckConfig, kernel: KernelConfig) -> Self {
+        Self { config, kernel }
     }
 
     /// Returns a list of desired configuration options and their current state in a kernel config.
@@ -127,5 +182,95 @@ impl Kcheck {
         }
 
         Ok(results)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::LazyLock;
+
+    use super::*;
+    use config::KcheckConfigBuilder;
+    use kconfig::KconfigOption;
+
+    const EXPECTED_KERNEL_CONFIG: [&str; 4] = [
+        "CONFIG_FOO=y",
+        "CONFIG_BAR=m",
+        "# CONFIG_BAZ is not set",
+        "CONFIG_USB_ACM=y",
+    ];
+
+    static TEST_KCHECK_CONFIG: LazyLock<Vec<KconfigOption>> = LazyLock::new(|| {
+        vec![
+            KconfigOption::new("CONFIG_FOO", KconfigState::On),
+            KconfigOption::new("CONFIG_BAR", KconfigState::Module),
+            KconfigOption::new("CONFIG_BAZ", KconfigState::Off),
+            KconfigOption::new("CONFIG_USB_ACM", KconfigState::Enabled),
+        ]
+    });
+
+    const TEST_KCHECK_CONFIG_TOML: &str = r#"
+        [[kernel]]
+        name = "CONFIG_FOO"
+        state = "On"
+
+        [[kernel]]
+        name = "CONFIG_BAR"
+        state = "Module"
+
+        [[kernel]]
+        name = "CONFIG_BAZ"
+        state = "Off"
+
+        [[kernel]]
+        name = "CONFIG_USB_ACM"
+        state = "Enabled"
+    "#;
+
+    #[test]
+    fn success_kcheck_perform_check() {
+        let config = KcheckConfigBuilder::default()
+            .kernel(TEST_KCHECK_CONFIG.to_owned())
+            .build()
+            .expect("Expected to build a Kcheck config");
+
+        let kernel_cfg_contents = EXPECTED_KERNEL_CONFIG.join("\n");
+        util::run_with_tmpfile("config", &kernel_cfg_contents, |path| {
+            let kernel_cfg = KernelConfigBuilder::default()
+                .user(path)
+                .build()
+                .expect("Expected to build a kernel config");
+
+            let kcheck = Kcheck::new(config, kernel_cfg);
+            let results = kcheck.perform_check().expect("Expected to perform check");
+
+            for result in results {
+                assert!(result.result == CheckResult::Pass);
+            }
+        });
+    }
+
+    #[test]
+    fn success_kcheck_builder_toml() {
+        let kernel_cfg_contents = EXPECTED_KERNEL_CONFIG.join("\n");
+        util::run_with_tmpfile("kernel_cfg", &kernel_cfg_contents, |kernel_cfg_path| {
+            util::run_with_tmpfile(
+                "kcheck_cfg.toml",
+                TEST_KCHECK_CONFIG_TOML,
+                |kcheck_cfg_path| {
+                    let kcheck = KcheckBuilder::default()
+                        .kernel_fragments(vec![kernel_cfg_path])
+                        .config_fragments(vec![kcheck_cfg_path])
+                        .build()
+                        .expect("Expected to build Kcheck structure");
+
+                    let results = kcheck.perform_check().expect("Expected to perform check");
+
+                    for result in results {
+                        assert!(result.result == CheckResult::Pass);
+                    }
+                },
+            );
+        });
     }
 }
