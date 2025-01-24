@@ -15,21 +15,21 @@ todo: links to build, crates, license
 
 todo: description
 
-# Motivation
+## Motivation
 
-# Installation
+## Installation
 
-# Features
+## Features
 
-# Usage
+## Usage
 
-# Configuration File Format
+## Configuration File Format
 
-# Minimum Supported Rust Version (MSRV)
+## Minimum Supported Rust Version (MSRV)
 
-# Contributing
+## Contributing
 
-# License
+## License
 
 Licensed under the [Mozilla Public License Version 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
 
@@ -37,4 +37,4 @@ Licensed under the [Mozilla Public License Version 2.0](https://www.mozilla.org/
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the MPL-2.0 license, without any additional terms or conditions.
 
-# Code of Conduct
+## Code of Conduct
