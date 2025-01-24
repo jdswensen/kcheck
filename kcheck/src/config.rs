@@ -233,10 +233,7 @@ impl IntoIterator for KcheckConfig {
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let mut kernel: Vec<KconfigOption> = match self.kernel {
-            Some(k) => k,
-            None => Vec::new(),
-        };
+        let mut kernel: Vec<KconfigOption> = self.kernel.unwrap_or_default();
 
         let fragments = match self.fragment {
             Some(f) => f.into_iter().flat_map(|f| f.kernel.into_iter()).collect(),
