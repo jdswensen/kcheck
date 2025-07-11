@@ -9,3 +9,6 @@
 *.profraw
 *.profdata
 **coverage/*
+
+# OS Files
+**/.DS_Store
