@@ -17,8 +17,6 @@
 //! - User wants to understand the reasons behind a kernel config setting
 //! - User wants to be able to check the state of kernel config options.
 //! - User may want to enforce runtime checks on kernel config options.
-//!
-//! todo: derive readme from doc comments
 
 #[cfg(feature = "cli-table")]
 use cli_table::{CellStruct, Color, Style, Table};

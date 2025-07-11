@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-    "kcheck",
     "kcheck-cli",
     "xtask"
 ]
@@ -11,7 +10,7 @@ version = "0.2.0"
 license = "MPL-2.0"
 authors = ["Jake Swensen <jake@swensen.io>"]
 keywords = ["kernel", "kconfig", "linux", "embedded"]
-description = "Kernel configuration checking utility"
+description = "A library for working with kernel configuration information."
 repository = "https://github.com/jdswensen/kcheck"
 edition = "2021"
 
@@ -30,3 +29,33 @@ thiserror = "1.0.50"
 toml = "0.8.6"
 rand = "0.8.5"
 tempfile = "3.10.1"
+
+[package]
+name = "kcheck"
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+keywords.workspace = true
+description.workspace = true
+repository.workspace = true
+edition.workspace = true
+
+[features]
+default = ["cli-table"]
+
+[dependencies]
+cli-table = { workspace = true, optional = true }
+typed-builder.workspace = true
+flate2.workspace = true
+nix.workspace = true
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+lazy_static.workspace = true
+rand.workspace = true
+tempfile.workspace = true

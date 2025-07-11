@@ -4,13 +4,11 @@ version.workspace = true
 license.workspace = true
 authors.workspace = true
 keywords.workspace = true
-description.workspace = true
+description = "A utility for working with kernel configuration information."
 repository.workspace = true
 edition.workspace = true
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 clap.workspace = true
 cli-table.workspace = true
-kcheck = { version = "0.2.0", path = "../kcheck" }
+kcheck = { version = "0.2.0", path = "../" }
