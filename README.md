@@ -49,6 +49,8 @@ cargo install kcheck-cli
 - [x] Parse a desired kernel config from config fragments located in a specific location
 - [ ] Parse kernel runtime parameters via `sysctl`
 - [ ] Compare a desired configuration to the running Linux kernel config at boot
+- [ ] Generate Linux kernel config fragments from `kcheck` config fragments
+- [ ] Generate `kcheck` config fragements from Linux kernel config fragments
 
 ## Configuration File Format
 
