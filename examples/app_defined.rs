@@ -27,5 +27,5 @@ fn main() {
         .with_title()
         .display()
         .unwrap();
-    println!("{}", table);
+    println!("{table}");
 }
